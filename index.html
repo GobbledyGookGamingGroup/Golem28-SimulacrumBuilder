@@ -35,8 +35,8 @@
           <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         );
 
-        const CopyIcon = ({ size = 18, className = "" }) => (
-          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+        const DownloadIcon = ({ size = 18, className = "" }) => (
+          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
         );
 
         const CheckCircleIcon = ({ size = 18, className = "" }) => (
@@ -45,12 +45,11 @@
 
         // --- DATA DEFINITIONS ---
         const COMPOSITIONS = {
-          A: { name: 'Configuration A', animators: 1, golems: 1, followers: 3 },
-          B: { name: 'Configuration B', animators: 1, golems: 2, followers: 1 }
+          1: { name: 'Configuration 1', animators: 1, animatorLimit: 15, animatorActions: 4, golems: 1, golemLimit: 21, lesserGolems: 0, lesserGolemLimit: 15, followers: 2, followerLimit: 12, followerActions: 2 },
+          2: { name: 'Configuration 2', animators: 1, animatorLimit: 15, animatorActions: 4, golems: 1, golemLimit: 21, lesserGolems: 1, lesserGolemLimit: 15, followers: 0, followerLimit: 12, followerActions: 2 },
+          3: { name: 'Configuration 3', animators: 1, animatorLimit: 18, animatorActions: 6, golems: 1, golemLimit: 21, lesserGolems: 0, lesserGolemLimit: 15, followers: 1, followerLimit: 12, followerActions: 2 },
+          4: { name: 'Configuration 4', animators: 1, animatorLimit: 15, animatorActions: 4, golems: 0, golemLimit: 21, lesserGolems: 1, lesserGolemLimit: 15, followers: 3, followerLimit: 12, followerActions: 2 }
         };
-
-        const ANIMATOR_LIMIT = 15;
-        const GOLEM_LIMIT = 21;
 
         const ANIMATOR_ATTRS = {
           commandRange: { name: 'Command Range', options: [{ val: '2d6"', cost: 1 }, { val: '2+1d6"', cost: 1 }, { val: '5"', cost: 1 }] },
@@ -158,15 +157,18 @@
 
         // --- MAIN APP COMPONENT ---
         const App = () => {
-          const [composition, setComposition] = useState('A');
-          const [copied, setCopied] = useState(false);
+          const [composition, setComposition] = useState('1');
+          const [isDownloaded, setIsDownloaded] = useState(false);
+          const [simulacrumName, setSimulacrumName] = useState('Unnamed Simulacra');
 
           const defaultAnimator = { commandRange: '2d6"', durability: '1', nimbleness: '4', clout: '1', physicalRange: 'BtB', ward: '1', mind: '4', name: 'Unnamed Animator' };
           const defaultGolem = { durability: '3', nimbleness: '3', clout: '3', physicalRange: 'BtB', ward: '3', mind: '3', commands: ['Dash', 'Bash', 'Stash'], name: 'Unnamed Golem' };
+          const defaultLesserGolem = { durability: '3', nimbleness: '3', clout: '3', physicalRange: 'BtB', ward: '3', mind: '3', commands: ['Dash', 'Bash', 'Stash'], name: 'Unnamed Lesser Golem' };
           const defaultFollower = { durability: '1', nimbleness: '4', clout: '1', physicalRange: 'BtB', ward: '1', mind: '4', name: 'Unnamed Follower' };
 
           const [animator, setAnimator] = useState({ ...defaultAnimator });
-          const [golems, setGolems] = useState([{ ...defaultGolem }, { ...defaultGolem }]);
+          const [golems, setGolems] = useState([{ ...defaultGolem }]);
+          const [lesserGolems, setLesserGolems] = useState([{ ...defaultLesserGolem }]);
           const [followers, setFollowers] = useState([{ ...defaultFollower }, { ...defaultFollower }, { ...defaultFollower }]);
 
           const getAnimatorCost = () => {
@@ -179,6 +181,26 @@
 
           const getGolemCost = (golemIndex) => {
             const g = golems[golemIndex];
+            let cost = Object.entries(g).reduce((sum, [key, val]) => {
+              if (key === 'commands' || key === 'name') return sum;
+              const opt = GOLEM_ATTRS[key].options.find(o => o.val === val);
+              return sum + (opt ? opt.cost : 0);
+            }, 0);
+
+            g.commands.forEach(cmdName => {
+              let cmdCost = 0;
+              Object.values(GOLEM_COMMANDS).forEach(category => {
+                const cmd = category.find(c => c.name === cmdName);
+                if (cmd) cmdCost = cmd.cost;
+              });
+              cost += cmdCost;
+            });
+
+            return cost;
+          };
+
+          const getLesserGolemCost = (golemIndex) => {
+            const g = lesserGolems[golemIndex];
             let cost = Object.entries(g).reduce((sum, [key, val]) => {
               if (key === 'commands' || key === 'name') return sum;
               const opt = GOLEM_ATTRS[key].options.find(o => o.val === val);
@@ -214,6 +236,12 @@
             setGolems(newGolems);
           };
 
+          const updateLesserGolem = (index, key, val) => {
+            const newLesserGolems = [...lesserGolems];
+            newLesserGolems[index][key] = val;
+            setLesserGolems(newLesserGolems);
+          };
+
           const toggleGolemCommand = (golemIndex, cmdName) => {
             const newGolems = [...golems];
             const cmds = newGolems[golemIndex].commands;
@@ -225,6 +253,17 @@
             setGolems(newGolems);
           };
 
+          const toggleLesserGolemCommand = (golemIndex, cmdName) => {
+            const newGolems = [...lesserGolems];
+            const cmds = newGolems[golemIndex].commands;
+            if (cmds.includes(cmdName)) {
+              newGolems[golemIndex].commands = cmds.filter(c => c !== cmdName);
+            } else {
+              newGolems[golemIndex].commands.push(cmdName);
+            }
+            setLesserGolems(newGolems);
+          };
+
           const updateFollower = (index, key, val) => {
             const newFollowers = [...followers];
             newFollowers[index][key] = val;
@@ -232,45 +271,84 @@
           };
 
           const exportList = () => {
-            let text = `=== GOLEM28 SIMULACRA ===\n`;
-            text += `Composition: ${COMPOSITIONS[composition].name}\n\n`;
+            const config = COMPOSITIONS[composition];
+            const HLINE = "================================================================================";
+            const SLINE = "--------------------------------------------------------------------------------";
+            const DLINE = "................................................................................";
+            
+            const pad = (str, len = 16) => (str + " ".repeat(len)).slice(0, len);
 
-            text += `[ANIMATOR] ${animator.name} (Worth: ${getAnimatorCost()}/${ANIMATOR_LIMIT})\n`;
+            let text = `${HLINE}\n`;
+            text += `                              GOLEM28 SIMULACRA\n`;
+            text += `${HLINE}\n`;
+            text += ` Name       : ${simulacrumName}\n`;
+            text += ` Composition: ${config.name}\n`;
+            text += `${HLINE}\n`;
+
+            // Animator Output
+            text += ` ANIMATOR: ${animator.name}\n`;
+            text += ` [ Worth: ${getAnimatorCost()}/${config.animatorLimit} | Actions: ${config.animatorActions} ]\n`;
+            text += `${SLINE}\n`;
             Object.entries(ANIMATOR_ATTRS).forEach(([key, data]) => {
-              text += `- ${data.name}: ${animator[key]}\n`;
+              text += `  ${pad(data.name)} : ${animator[key]}\n`;
             });
-            text += `\n`;
+            text += `${HLINE}\n`;
 
-            for (let i = 0; i < COMPOSITIONS[composition].golems; i++) {
-              text += `[GOLEM ${i + 1}] ${golems[i].name} (Worth: ${getGolemCost(i)}/${GOLEM_LIMIT})\n`;
+            // Golems Output
+            for (let i = 0; i < config.golems; i++) {
+              text += ` GOLEM ${i + 1}: ${golems[i].name}\n`;
+              text += ` [ Worth: ${getGolemCost(i)}/${config.golemLimit} ]\n`;
+              text += `${SLINE}\n`;
               Object.entries(GOLEM_ATTRS).forEach(([key, data]) => {
-                text += `- ${data.name}: ${golems[i][key]}\n`;
+                text += `  ${pad(data.name)} : ${golems[i][key]}\n`;
               });
-              text += `- Commands: ${golems[i].commands.join(', ') || 'None'}\n\n`;
+              text += `${DLINE}\n`;
+              text += `  Commands         : ${golems[i].commands.join(', ') || 'None'}\n`;
+              text += `${HLINE}\n`;
             }
 
-            for (let i = 0; i < COMPOSITIONS[composition].followers; i++) {
-              text += `[FOLLOWER ${i + 1}] ${followers[i].name} (Worth: ${getFollowerCost(i)})\n`;
+            // Lesser Golems Output
+            for (let i = 0; i < config.lesserGolems; i++) {
+              text += ` LESSER GOLEM ${i + 1}: ${lesserGolems[i].name}\n`;
+              text += ` [ Worth: ${getLesserGolemCost(i)}/${config.lesserGolemLimit} ]\n`;
+              text += `${SLINE}\n`;
+              Object.entries(GOLEM_ATTRS).forEach(([key, data]) => {
+                text += `  ${pad(data.name)} : ${lesserGolems[i][key]}\n`;
+              });
+              text += `${DLINE}\n`;
+              text += `  Commands         : ${lesserGolems[i].commands.join(', ') || 'None'}\n`;
+              text += `${HLINE}\n`;
+            }
+
+            // Followers Output
+            for (let i = 0; i < config.followers; i++) {
+              text += ` FOLLOWER ${i + 1}: ${followers[i].name}\n`;
+              text += ` [ Worth: ${getFollowerCost(i)}/${config.followerLimit} | Actions: ${config.followerActions} ]\n`;
+              text += `${SLINE}\n`;
               Object.entries(FOLLOWER_ATTRS).forEach(([key, data]) => {
-                text += `- ${data.name}: ${followers[i][key]}\n`;
+                text += `  ${pad(data.name)} : ${followers[i][key]}\n`;
               });
-              text += `\n`;
+              text += `${HLINE}\n`;
             }
 
-            text += `From ash to ash and dust to dust.`;
+            text += `  "From ash to ash and dust to dust. A god of things gathers its dust."\n`;
+            text += `${HLINE}\n`;
 
-            const textArea = document.createElement("textarea");
-            textArea.value = text;
-            document.body.appendChild(textArea);
-            textArea.select();
-            try {
-              document.execCommand('copy');
-              setCopied(true);
-              setTimeout(() => setCopied(false), 2000);
-            } catch (err) {
-              console.error('Failed to copy', err);
-            }
-            document.body.removeChild(textArea);
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            
+            const safeName = simulacrumName.trim().replace(/\s+/g, '-');
+            a.download = `Golem28-Simulacra-${safeName}.txt`;
+            
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            setIsDownloaded(true);
+            setTimeout(() => setIsDownloaded(false), 2000);
           };
 
           return (
@@ -290,6 +368,20 @@
 
               <main className="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
                 
+                {/* Simulacrum Name Input */}
+                <div className="bg-stone-900 border border-stone-800 rounded-xl p-6 shadow-2xl flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <div className="text-red-700 font-bold uppercase tracking-widest text-sm flex items-center gap-2">
+                    Simulacrum:
+                  </div>
+                  <input 
+                    type="text" 
+                    value={simulacrumName}
+                    onChange={(e) => setSimulacrumName(e.target.value)}
+                    className="bg-transparent text-3xl font-serif font-bold text-stone-100 focus:outline-none border-b border-dashed border-stone-700 focus:border-red-800 hover:border-stone-500 transition-colors w-full flex-1"
+                    placeholder="Name your Simulacrum..."
+                  />
+                </div>
+
                 {/* Composition & Tools */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-stone-900/50 p-4 rounded-lg border border-stone-800 shadow-xl backdrop-blur-sm">
                   <div className="flex-1">
@@ -301,13 +393,16 @@
                         <button
                           key={key}
                           onClick={() => setComposition(key)}
-                          className={`px-4 py-2 rounded font-medium transition-all ${
+                          className={`px-4 py-2 rounded font-medium transition-all text-sm sm:text-base ${
                             composition === key 
                               ? 'bg-red-950/50 border-red-800 text-red-200 border shadow-inner' 
                               : 'bg-stone-950 border border-stone-800 text-stone-400 hover:bg-stone-800 hover:text-stone-200'
                           }`}
                         >
-                          {config.name} ({config.animators} Animator, {config.golems} Golem{config.golems > 1 ? 's' : ''}, {config.followers} Follower{config.followers > 1 ? 's' : ''})
+                          <div className="font-bold">{config.name}</div>
+                          <div className="text-xs opacity-75 mt-1">
+                            {config.animators} Anim, {config.golems} Gol, {config.lesserGolems} L.Gol, {config.followers} Fol
+                          </div>
                         </button>
                       ))}
                     </div>
@@ -317,8 +412,8 @@
                     onClick={exportList}
                     className="flex items-center gap-2 px-6 py-3 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded border border-stone-600 transition-colors shadow-lg self-stretch md:self-auto"
                   >
-                    {copied ? <CheckCircleIcon size={18} className="text-green-500" /> : <CopyIcon size={18} />}
-                    {copied ? 'Copied to Clipboard!' : 'Export Roster'}
+                    {isDownloaded ? <CheckCircleIcon size={18} className="text-green-500" /> : <DownloadIcon size={18} />}
+                    {isDownloaded ? 'Downloaded!' : 'Download Roster'}
                   </button>
                 </div>
 
@@ -336,7 +431,7 @@
                       />
                     </div>
                     <div className="w-full sm:w-48 shrink-0">
-                      <ProgressBar current={getAnimatorCost()} max={ANIMATOR_LIMIT} />
+                      <ProgressBar current={getAnimatorCost()} max={COMPOSITIONS[composition].animatorLimit} />
                     </div>
                   </div>
                   <div className="p-4 sm:p-6 grid gap-2">
@@ -367,7 +462,7 @@
                         />
                       </div>
                       <div className="w-full sm:w-48 shrink-0">
-                        <ProgressBar current={getGolemCost(i)} max={GOLEM_LIMIT} />
+                        <ProgressBar current={getGolemCost(i)} max={COMPOSITIONS[composition].golemLimit} />
                       </div>
                     </div>
                     
@@ -424,6 +519,78 @@
                   </section>
                 ))}
 
+                {/* Lesser Golems Section */}
+                {Array.from({ length: COMPOSITIONS[composition].lesserGolems }).map((_, i) => (
+                  <section key={`lesser-golem-${i}`} className="bg-stone-900 border border-stone-800 rounded-xl shadow-2xl overflow-hidden">
+                    <div className="bg-[#1a1816] border-b border-stone-800 p-4 sm:p-6 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                      <div className="flex items-center gap-3">
+                        <HammerIcon className="text-stone-500" size={24} />
+                        <input 
+                          type="text" 
+                          value={lesserGolems[i].name}
+                          onChange={(e) => updateLesserGolem(i, 'name', e.target.value)}
+                          className="bg-transparent text-xl font-serif font-bold text-stone-100 focus:outline-none border-b border-dashed border-stone-700 focus:border-stone-500 transition-colors w-full sm:w-auto"
+                          placeholder={`Lesser Golem ${i + 1} Name`}
+                        />
+                      </div>
+                      <div className="w-full sm:w-48 shrink-0">
+                        <ProgressBar current={getLesserGolemCost(i)} max={COMPOSITIONS[composition].lesserGolemLimit} />
+                      </div>
+                    </div>
+                    
+                    <div className="p-4 sm:p-6 border-b border-stone-800 grid gap-2">
+                      <h3 className="text-sm font-bold uppercase tracking-widest text-stone-500 mb-2">Attributes</h3>
+                      {Object.entries(GOLEM_ATTRS).map(([key, data]) => (
+                        <AttributeRow
+                          key={key}
+                          label={data.name}
+                          options={data.options}
+                          currentValue={lesserGolems[i][key]}
+                          onChange={(val) => updateLesserGolem(i, key, val)}
+                        />
+                      ))}
+                    </div>
+
+                    <div className="p-4 sm:p-6 bg-stone-950/30">
+                      <h3 className="text-sm font-bold uppercase tracking-widest text-stone-500 mb-4">Commands Purchased</h3>
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {Object.entries(GOLEM_COMMANDS).map(([category, cmds]) => (
+                          <div key={category} className="space-y-2 border border-stone-800 p-4 rounded bg-stone-900/50">
+                            <h4 className="text-xs uppercase text-stone-400 font-bold border-b border-stone-800 pb-2 mb-3">{category}</h4>
+                            {cmds.map(cmd => {
+                              const isSelected = lesserGolems[i].commands.includes(cmd.name);
+                              return (
+                                <label 
+                                  key={cmd.name} 
+                                  className={`flex items-start gap-3 p-2 rounded cursor-pointer transition-colors border ${
+                                    isSelected ? 'bg-stone-800/80 border-stone-600' : 'hover:bg-stone-800/40 border-transparent'
+                                  }`}
+                                >
+                                  <input 
+                                    type="checkbox" 
+                                    className="mt-1 w-4 h-4 accent-red-700 bg-stone-900 border-stone-700 cursor-pointer"
+                                    checked={isSelected}
+                                    onChange={() => toggleLesserGolemCommand(i, cmd.name)}
+                                  />
+                                  <div className="flex-1 leading-snug">
+                                    <div className="flex justify-between items-center">
+                                      <span className={`font-bold ${isSelected ? 'text-stone-200' : 'text-stone-400'}`}>
+                                        {cmd.name}
+                                      </span>
+                                      <span className="text-xs text-stone-500">({cmd.cost}W)</span>
+                                    </div>
+                                    <p className="text-xs text-stone-500 mt-1">{cmd.desc}</p>
+                                  </div>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </section>
+                ))}
+
                 {/* Followers Section */}
                 {COMPOSITIONS[composition].followers > 0 && (
                   <div className="space-y-6">
@@ -433,7 +600,7 @@
                     <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                       {Array.from({ length: COMPOSITIONS[composition].followers }).map((_, i) => (
                         <section key={`follower-${i}`} className="bg-stone-900 border border-stone-800 rounded-xl shadow-lg overflow-hidden flex flex-col">
-                          <div className="bg-[#1a1816] border-b border-stone-800 p-4 flex justify-between items-center gap-2">
+                          <div className="bg-[#1a1816] border-b border-stone-800 p-4 flex flex-col gap-2">
                             <input 
                               type="text" 
                               value={followers[i].name}
@@ -441,6 +608,7 @@
                               className="bg-transparent text-xl font-serif font-bold text-stone-100 focus:outline-none border-b border-dashed border-stone-700 focus:border-stone-500 transition-colors w-full"
                               placeholder={`Follower ${i + 1}`}
                             />
+                            <ProgressBar current={getFollowerCost(i)} max={COMPOSITIONS[composition].followerLimit} />
                           </div>
                           <div className="p-4 grid gap-3 flex-1 text-sm">
                             {Object.entries(FOLLOWER_ATTRS).map(([key, data]) => (
@@ -457,10 +625,6 @@
                                 </select>
                               </div>
                             ))}
-                            <div className="mt-auto pt-4 border-t border-stone-800 flex justify-between items-center text-xs">
-                               <span className="text-stone-500 uppercase font-bold tracking-wider">Total Worth</span>
-                               <span className="bg-stone-800 px-2 py-1 rounded text-stone-300">{getFollowerCost(i)}</span>
-                            </div>
                           </div>
                         </section>
                       ))}
