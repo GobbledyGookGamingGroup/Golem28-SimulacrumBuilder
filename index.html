@@ -106,11 +106,11 @@
 
         const ANIMATOR_ATTRS = {
           commandRange: { name: 'Command Range', options: [{ val: '2d6"', cost: 1 }, { val: '2+1d6"', cost: 1 }, { val: '5"', cost: 1 }] },
-          durability: { name: 'Durability', options: [{ val: '1', cost: 1 }, { val: '2', cost: 2 }, { val: '3', cost: 4 }] },
+          durability: { name: 'Durability', options: [{ val: '2', cost: 1 }, { val: '3', cost: 2 }, { val: '4', cost: 4 }] },
           nimbleness: { name: 'Nimbleness', options: [{ val: '4', cost: 1 }, { val: '5', cost: 2 }, { val: '6', cost: 4 }] },
-          clout: { name: 'Clout', options: [{ val: '1', cost: 1 }, { val: '2', cost: 3 }, { val: '3', cost: 5 }] },
-          physicalRange: { name: 'Physical Range', options: [{ val: 'BtB', cost: 0 }, { val: '3"', cost: 2 }, { val: '1+1d6"', cost: 3 }, { val: '2d6"', cost: 3 }] },
-          ward: { name: 'Ward', options: [{ val: '1', cost: 1 }, { val: '2', cost: 2 }, { val: '3', cost: 4 }, { val: '4', cost: 6 }] },
+          clout: { name: 'Clout', options: [{ val: '2', cost: 1 }, { val: '3', cost: 3 }, { val: '4', cost: 5 }] },
+          physicalRange: { name: 'Physical Range', options: [{ val: 'BtB', cost: 0 }, { val: '3"', cost: 1 }, { val: '1+1d6"', cost: 2 }, { val: '2d6"', cost: 3 }] },
+          ward: { name: 'Ward', options: [{ val: '1', cost: 1 }, { val: '2', cost: 2 }, { val: '3', cost: 4 }] },
           mind: { name: 'Mind', options: [{ val: '4', cost: 1 }, { val: '5', cost: 2 }, { val: '6', cost: 3 }] }
         };
 
@@ -118,15 +118,15 @@
           durability: { name: 'Durability', options: [{ val: '3', cost: 1 }, { val: '4', cost: 2 }, { val: '5', cost: 4 }, { val: '6', cost: 7 }] },
           nimbleness: { name: 'Nimbleness', options: [{ val: '3', cost: 1 }, { val: '4', cost: 2 }, { val: '5', cost: 4 }, { val: '6', cost: 7 }] },
           clout: { name: 'Clout', options: [{ val: '3', cost: 1 }, { val: '4', cost: 2 }, { val: '5', cost: 4 }, { val: '6', cost: 7 }] },
-          physicalRange: { name: 'Physical Range', options: [{ val: 'BtB', cost: 1 }, { val: '3"', cost: 2 }, { val: '1+1d6"', cost: 4 }, { val: '2d6"', cost: 7 }] },
+          physicalRange: { name: 'Physical Range', options: [{ val: 'BtB', cost: 1 }, { val: '3"', cost: 3 }, { val: '1+1d6"', cost: 4 }, { val: '2d6"', cost: 5 }] },
           ward: { name: 'Ward', options: [{ val: '3', cost: 1 }, { val: '4', cost: 2 }, { val: '5', cost: 4 }, { val: '6', cost: 7 }] },
           mind: { name: 'Mind', options: [{ val: '3', cost: 1 }, { val: '4', cost: 2 }, { val: '5', cost: 4 }, { val: '6', cost: 7 }] }
         };
 
         const FOLLOWER_ATTRS = {
-          durability: { name: 'Durability', options: [{ val: '1', cost: 1 }, { val: '2', cost: 2 }, { val: '3', cost: 4 }] },
+          durability: { name: 'Durability', options: [{ val: '2', cost: 1 }, { val: '3', cost: 2 }, { val: '4', cost: 4 }] },
           nimbleness: { name: 'Nimbleness', options: [{ val: '4', cost: 1 }, { val: '5', cost: 2 }, { val: '6', cost: 4 }] },
-          clout: { name: 'Clout', options: [{ val: '1', cost: 1 }, { val: '2', cost: 3 }, { val: '3', cost: 5 }] },
+          clout: { name: 'Clout', options: [{ val: '2', cost: 1 }, { val: '3', cost: 3 }, { val: '4', cost: 5 }] },
           physicalRange: { name: 'Physical Range', options: [{ val: 'BtB', cost: 0 }, { val: '3"', cost: 2 }, { val: '1+1d6"', cost: 3 }, { val: '2d6"', cost: 3 }] },
           ward: { name: 'Ward', options: [{ val: '1', cost: 1 }, { val: '2', cost: 2 }, { val: '3', cost: 4 }, { val: '4', cost: 6 }] },
           mind: { name: 'Mind', options: [{ val: '4', cost: 1 }, { val: '5', cost: 2 }, { val: '6', cost: 3 }] }
@@ -135,31 +135,31 @@
         const GOLEM_COMMANDS = {
           Movement: [
             { name: 'Dash', cost: 0, desc: "Move up to nimbleness in inches." },
-            { name: 'Lash', cost: 1, desc: "Move 1d6-3 inches (push on negative)." }
+            { name: 'Lash', cost: 1, desc: "Roll 1d6 and subtract Nimbleness. Positive = move distance. Negative = pushed backwards." }
           ],
           Violence: [
-            { name: 'Bash', cost: 0, desc: "Physical attack at range." },
-            { name: 'Crash', cost: 2, desc: "Move 1d3\" to target, physical attack with +1D." },
-            { name: 'Slash', cost: 2, desc: "Two physical attacks, -1D each." },
-            { name: 'Gnash', cost: 2, desc: "Ward save or target is enwrapped." },
-            { name: 'Gash', cost: 2, desc: "Physical attack with 1D. Target is gouged." },
-            { name: 'Smash', cost: 1, desc: "Physical attack with +1D clout. Push 1d3\"." },
-            { name: 'Thrash', cost: 2, desc: "Physical attack on all BtB units (+1D clout)." },
-            { name: 'Trash', cost: 1, desc: "Physical attack on BtB (-1D clout). +1d3 dmg to terrain." }
+            { name: 'Bash', cost: 0, desc: "Perform a physical attack at range." },
+            { name: 'Crash', cost: 2, desc: "Move up to 1d3\" to target. If BtB, physical attack with +1D." },
+            { name: 'Slash', cost: 2, desc: "Two physical attacks, 1D each to clout, at range." },
+            { name: 'Gnash', cost: 2, desc: "Physical attack at range with -1D to clout. Target stunned on hit." },
+            { name: 'Gash', cost: 2, desc: "Physical attack at range with -1D to clout. Target gouged on hit." },
+            { name: 'Smash', cost: 1, desc: "Physical attack at range with 1D to clout. Hit pushes target 1d3\"." },
+            { name: 'Thrash', cost: 2, desc: "Physical attack on all BtB units with -1D to clout." },
+            { name: 'Trash', cost: 1, desc: "Physical attack against BtB target with -1D to Clout. +1d3 dmg to terrain if hit." }
           ],
           Productive: [
-            { name: 'Stash', cost: 0, desc: "Pick up item/objective/downed golem." },
-            { name: 'Hash', cost: 1, desc: "Ward DC:12+ to recover 1 impairment." },
-            { name: 'Mishmash', cost: 1, desc: "Nimbleness roll to steal 1 item from BtB golem." }
+            { name: 'Stash', cost: 0, desc: "Pick up an item, objective or downed golem." },
+            { name: 'Hash', cost: 1, desc: "Unopposed Ward roll DC:12+ to recover 1 impairment." },
+            { name: 'Mishmash', cost: 1, desc: "Unopposed Nimbleness roll against BtB target to swap places." }
           ],
           Magicka: [
-            { name: 'Ash', cost: 2, desc: "Mind +1D (DC 10+) to magically attack at range (R-9)\"." },
-            { name: 'Flash', cost: 2, desc: "Mind (DC 13+) to magically attack at range (R-12)\"." },
-            { name: 'Rash', cost: 2, desc: "Mind DC:12+ to inflict rotting at range (R-11)\"." },
-            { name: 'Sash', cost: 2, desc: "Mind DC:10+ to give target +1D to next roll." },
-            { name: 'Splash', cost: 2, desc: "Mind DC:10+ to place 5\" -1D splash template." },
-            { name: 'Whiplash', cost: 2, desc: "Mind DC:12+ to push target 1d3\" at range (R-11)\"." },
-            { name: 'Zash', cost: 1, desc: "Mind DC:10+ to transfer 1d3 durability to target." }
+            { name: 'Ash', cost: 2, desc: "Unopposed mind roll DC:10+. Magickally attack golem within (R-9)\"." },
+            { name: 'Flash', cost: 2, desc: "Unopposed mind roll DC:12+. Magickally attack target within 4\"." },
+            { name: 'Rash', cost: 2, desc: "Unopposed mind roll DC:12+. Target within (R-11)\" is rotting." },
+            { name: 'Sash', cost: 2, desc: "Unopposed mind roll DC:10+. Target within (R-10)\" gets +1D to next roll." },
+            { name: 'Splash', cost: 2, desc: "Unopposed mind roll DC:10+. Place 5\" template within (R-9)\". Units inside suffer -1D. Difficult terrain." },
+            { name: 'Whiplash', cost: 2, desc: "Unopposed mind roll DC:12+. Target within (R-11)\" pushed 1d3\"." },
+            { name: 'Zash', cost: 1, desc: "Unopposed mind roll DC:10+. Transfer 1d3 durability to target. Can down golem." }
           ]
         };
 
@@ -217,10 +217,10 @@
           const [isDownloaded, setIsDownloaded] = useState(false);
           const [simulacrumName, setSimulacrumName] = useState('Unnamed Simulacra');
 
-          const defaultAnimator = { commandRange: '2d6"', durability: '1', nimbleness: '4', clout: '1', physicalRange: 'BtB', ward: '1', mind: '4', name: 'Unnamed Animator' };
+          const defaultAnimator = { commandRange: '2d6"', durability: '2', nimbleness: '4', clout: '2', physicalRange: 'BtB', ward: '1', mind: '4', name: 'Unnamed Animator' };
           const defaultGolem = { durability: '3', nimbleness: '3', clout: '3', physicalRange: 'BtB', ward: '3', mind: '3', commands: ['Dash', 'Bash', 'Stash'], name: 'Unnamed Golem' };
           const defaultLesserGolem = { durability: '3', nimbleness: '3', clout: '3', physicalRange: 'BtB', ward: '3', mind: '3', commands: ['Dash', 'Bash', 'Stash'], name: 'Unnamed Lesser Golem' };
-          const defaultFollower = { durability: '1', nimbleness: '4', clout: '1', physicalRange: 'BtB', ward: '1', mind: '4', name: 'Unnamed Follower' };
+          const defaultFollower = { durability: '2', nimbleness: '4', clout: '2', physicalRange: 'BtB', ward: '1', mind: '4', name: 'Unnamed Follower' };
 
           const [animator, setAnimator] = useState({ ...defaultAnimator });
           const [golems, setGolems] = useState([{ ...defaultGolem }]);
@@ -334,6 +334,14 @@
             setFollowers(newFollowers);
           };
 
+          const getCommandData = (cmdName) => {
+            for (const category of Object.values(GOLEM_COMMANDS)) {
+              const found = category.find(c => c.name === cmdName);
+              if (found) return found;
+            }
+            return null;
+          };
+
           const exportList = () => {
             const config = COMPOSITIONS[composition];
             const HLINE = "================================================================================";
@@ -367,7 +375,19 @@
                 text += `  ${pad(data.name)} : ${golems[i][key]}\n`;
               });
               text += `${DLINE}\n`;
-              text += `  Commands         : ${golems[i].commands.join(', ') || 'None'}\n`;
+              text += `  Commands:\n`;
+              if (golems[i].commands.length === 0) {
+                text += `    None\n`;
+              } else {
+                golems[i].commands.forEach(cmdName => {
+                  const cmdData = getCommandData(cmdName);
+                  if (cmdData) {
+                    text += `    - ${cmdData.name} (${cmdData.cost}W): ${cmdData.desc}\n`;
+                  } else {
+                    text += `    - ${cmdName}\n`;
+                  }
+                });
+              }
               text += `${HLINE}\n`;
             }
 
@@ -380,7 +400,19 @@
                 text += `  ${pad(data.name)} : ${lesserGolems[i][key]}\n`;
               });
               text += `${DLINE}\n`;
-              text += `  Commands         : ${lesserGolems[i].commands.join(', ') || 'None'}\n`;
+              text += `  Commands:\n`;
+              if (lesserGolems[i].commands.length === 0) {
+                text += `    None\n`;
+              } else {
+                lesserGolems[i].commands.forEach(cmdName => {
+                  const cmdData = getCommandData(cmdName);
+                  if (cmdData) {
+                    text += `    - ${cmdData.name} (${cmdData.cost}W): ${cmdData.desc}\n`;
+                  } else {
+                    text += `    - ${cmdName}\n`;
+                  }
+                });
+              }
               text += `${HLINE}\n`;
             }
 
